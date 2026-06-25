@@ -1,0 +1,9 @@
+# Runtime dependency, needed only for talking to real CAN hardware (transport).
+# The pure layers (protocol/j1939/decode) and "sim" mode work without it.
+#
+# Pinned to the 4.x line: 4.3+ has the widest vendor-backend + Python 3.12
+# wheel support (PEAK, Kvaser, Vector, SocketCAN, virtual, ...).
+python-can>=4.3,<5
+
+# Dev/test (optional): pip install -r requirements.txt pytest
+# or:                   pip install -e .[dev]

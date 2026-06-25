@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sick-ahm36"
+version = "0.1.0"
+description = "Rudimentary modular library to read speed and position from a SICK AHM36A encoder over SAE J1939 / CAN."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Proprietary" }
+authors = [{ name = "ASI Robots" }]
+dependencies = [
+    # Needed only for real CAN hardware; sim mode + pure layers work without it.
+    "python-can>=4.3,<5",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+# Launches the Tkinter GUI without a console window (Tkinter ships with Python).
+[project.gui-scripts]
+sick-ahm36-gui = "sick_ahm36.gui:main"
+
+[tool.setuptools]
+packages = ["sick_ahm36"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
