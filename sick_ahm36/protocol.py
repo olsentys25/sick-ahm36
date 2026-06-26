@@ -96,6 +96,7 @@ class Param(IntEnum):
     SPEED_FORMAT = 132
     UPDATE_TIME_T1 = 133
     CYCLE_TIME_FFE0 = 137
+    PRIO_PGN0 = 138
     CYCLE_TIME_FFE1 = 140
     CYCLE_TIME_FFE2 = 144
     NODE_ADDRESS = 149
@@ -113,6 +114,7 @@ PARAM_INFO = {
     Param.SPEED_FORMAT: (ParamType.UINT32, "Speed format (see SpeedFormat)"),
     Param.UPDATE_TIME_T1: (ParamType.UINT32, "Update time T1 in ms (1..50)"),
     Param.CYCLE_TIME_FFE0: (ParamType.UINT32, "Cycle time PGN 0xFFE0 in ms (0=off, 10..10000)"),
+    Param.PRIO_PGN0: (ParamType.UINT8, "J1939 priority of PGN 0xFFE0 broadcast (0..7, default 3)"),
     Param.CYCLE_TIME_FFE1: (ParamType.UINT32, "Cycle time PGN 0xFFE1 in ms (0=off, 10..10000)"),
     Param.CYCLE_TIME_FFE2: (ParamType.UINT32, "Cycle time PGN 0xFFE2 in ms (0=off, 10..10000)"),
     Param.NODE_ADDRESS: (ParamType.UINT8, "Node address"),

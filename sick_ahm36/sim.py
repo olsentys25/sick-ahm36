@@ -35,6 +35,7 @@ _DEFAULT_PARAMS = {
     Param.SPEED_FORMAT: int(protocol.DEFAULT_SPEED_FORMAT),
     Param.UPDATE_TIME_T1: 2,
     Param.CYCLE_TIME_FFE0: 10,
+    Param.PRIO_PGN0: 3,
     Param.CYCLE_TIME_FFE1: 0,
     Param.CYCLE_TIME_FFE2: 0,
     Param.NODE_ADDRESS: protocol.DEFAULT_SOURCE_ADDRESS,

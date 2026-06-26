@@ -56,10 +56,17 @@ def tophandler_angle_deg(raw_value: float, zero_offset: float = 0.0) -> float:
 # value could silently invert yaw. It is handled as an explicit, opt-in arg to
 # apply() and called out in MANUAL_NOTES instead.
 
+# J1939 priority of the broadcast. The encoder's factory default is 3, but the
+# VCU DBC (Vak.dbc) defines the message at priority 6, and the firmware's CAN
+# filter matches the full 29-bit ID - so the encoder MUST be set to 6 or the VCU
+# won't receive it. This is the priority byte of the DBC message ID 0x18FFE0E0.
+BROADCAST_PRIORITY = 6
+
 REQUIRED_PARAMS: dict[Param, int] = {
     Param.STEPS_PER_REV: ENC_RES_PER_REV,        # 16384
     Param.TOTAL_MEASURING_RANGE: ENC_SCALE,      # 262144 (+ round-axis, see notes)
     Param.CYCLE_TIME_FFE0: 10,                   # 10 ms, matches GenMsgCycleTime
+    Param.PRIO_PGN0: BROADCAST_PRIORITY,         # 6, must match the DBC's priority field
     Param.BAUD_RATE: 250,                         # 250 kbit/s (bus default)
     Param.NODE_ADDRESS: 224,                      # 0xE0, matches the DBC message ID
 }
