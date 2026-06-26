@@ -61,7 +61,7 @@ def _mask_to_length(value: int, length: int) -> int:
 
 def build_request(msg_id: ConfigMsgId, param_index: int, *,
                   source_address: int, destination_address: int,
-                  length: int = 0, value: int = 0, priority: int = 6) -> Frame:
+                  length: int = 0, value: int = 0, priority: int = 7) -> Frame:
     """Build a 0xEF00 request frame addressed to the encoder."""
     data = bytearray(8)
     data[0] = int(msg_id) & 0xFF

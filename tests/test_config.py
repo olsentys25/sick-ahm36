@@ -57,6 +57,14 @@ def test_read_all_skips_write_only():
         assert Param.FACTORY_RESET not in params
 
 
+def test_measuring_range_write_read_asymmetry():
+    # The SICK writes the measuring range at index 131 but reads it at 128;
+    # write_param applies the override and the value reads back through 128.
+    with _enc() as enc:
+        enc.write_param(Param.TOTAL_MEASURING_RANGE, 262144)
+        assert enc.read_param(Param.TOTAL_MEASURING_RANGE) == 262144
+
+
 def test_read_write_only_param_rejected():
     with _enc() as enc:
         try:

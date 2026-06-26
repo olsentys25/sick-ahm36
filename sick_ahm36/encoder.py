@@ -228,11 +228,19 @@ class Ahm36Encoder:
         return None
 
     def read_param(self, param: Param) -> int:
-        """Read a configuration parameter from the encoder. Raises on error."""
+        """Read a configuration parameter from the encoder. Raises on error.
+
+        The SICK read request must carry the parameter's byte length (its data
+        type size), same as a write - the manual's read examples show e.g.
+        len=1 for counting direction (UINT8), len=4 for steps/rev (UINT32).
+        Sending length 0 makes the encoder reject the read with error 0xFF.
+        """
+        ptype, _desc = PARAM_INFO[param]
         frame = configmsg.build_request(
             ConfigMsgId.READ, int(param),
             source_address=self._client_address,
-            destination_address=self._encoder_address)
+            destination_address=self._encoder_address,
+            length=int(ptype))
         resp = self._config_txn(frame, int(param), self._config_timeout)
         if resp is None:
             raise TimeoutError(f"no reply reading param {int(param)} ({param.name})")
@@ -247,12 +255,15 @@ class Ahm36Encoder:
         bus until the master matches the new setting; resets are destructive.
         """
         ptype, _desc = PARAM_INFO[param]
+        # A few params read and write at different indexes (e.g. measuring range
+        # reads at 128 but writes at 131); honour that here.
+        write_index = protocol.WRITE_INDEX_OVERRIDE.get(param, int(param))
         frame = configmsg.build_request(
-            ConfigMsgId.WRITE, int(param),
+            ConfigMsgId.WRITE, write_index,
             source_address=self._client_address,
             destination_address=self._encoder_address,
             length=int(ptype), value=int(value))
-        resp = self._config_txn(frame, int(param), self._config_timeout)
+        resp = self._config_txn(frame, write_index, self._config_timeout)
         if resp is None:
             raise TimeoutError(f"no reply writing param {int(param)} ({param.name})")
         if not resp.ok:

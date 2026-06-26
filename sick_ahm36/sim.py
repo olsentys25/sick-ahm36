@@ -132,6 +132,13 @@ class SimulatedBus(BaseTransport):
                 index, source_address=self._sa, destination_address=client,
                 length=length, value=val, error_code=error_code)
 
+        # Mirror the real encoder: the measuring range is written at index 131
+        # but read back at 128.
+        if (msg_id == ConfigMsgId.WRITE
+                and index == protocol.WRITE_INDEX_OVERRIDE[Param.TOTAL_MEASURING_RANGE]):
+            self._params[Param.TOTAL_MEASURING_RANGE] = value
+            return respond(0x00)
+
         try:
             param = Param(index)
         except ValueError:

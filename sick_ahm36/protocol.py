@@ -91,7 +91,8 @@ class Param(IntEnum):
     BAUD_RATE = 7
     COUNTING_DIRECTION = 129
     STEPS_PER_REV = 130
-    TOTAL_MEASURING_RANGE = 131
+    TOTAL_MEASURING_RANGE = 128   # READ index: the effective range (read-only).
+                                  # WRITE goes to index 131 - see WRITE_INDEX_OVERRIDE.
     SPEED_FORMAT = 132
     UPDATE_TIME_T1 = 133
     CYCLE_TIME_FFE0 = 137
@@ -119,6 +120,14 @@ PARAM_INFO = {
     Param.POWER_CYCLE: (ParamType.UINT8, "Power cycle / reset (write-only)"),
     Param.FACTORY_RESET: (ParamType.UINT8, "Factory reset (write-only)"),
 }
+
+
+# The SICK total measuring range is asymmetric (verified live on an AHM36A): the
+# *effective* range is read read-only at index 128, but a new range is *written*
+# to index 131 ("total measuring range modified"). Writing 131 updates the value
+# read back at 128 and rescales the broadcast position into the new range. Any
+# param not listed here is written to its own index.
+WRITE_INDEX_OVERRIDE = {Param.TOTAL_MEASURING_RANGE: 131}
 
 
 class ConfigMsgId(IntEnum):
