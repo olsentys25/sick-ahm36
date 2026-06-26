@@ -334,12 +334,20 @@ class Ahm36Encoder:
         self.write_param(Param.PRESET, value)
 
     def power_cycle(self) -> None:
-        """Trigger an encoder reset / power cycle (param 254, write-only)."""
-        self.write_param(Param.POWER_CYCLE, 1)
+        """Trigger an encoder reset / power cycle (param 254, write-only).
+
+        The trigger value is 0 (confirmed live: value 1 is rejected with 0xFF;
+        value 0 is accepted and the encoder resets).
+        """
+        self.write_param(Param.POWER_CYCLE, 0)
 
     def factory_reset(self) -> None:
-        """Restore factory defaults (param 255, write-only). Destructive."""
-        self.write_param(Param.FACTORY_RESET, 1)
+        """Restore factory defaults (param 255, write-only). Destructive.
+
+        Trigger value 0, matching the power-cycle command (these reset commands
+        are triggered by writing 0, not 1).
+        """
+        self.write_param(Param.FACTORY_RESET, 0)
 
     # --- lifecycle ----------------------------------------------------------
 
