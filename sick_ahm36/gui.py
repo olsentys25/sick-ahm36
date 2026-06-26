@@ -171,6 +171,18 @@ class EncoderGui(tk.Tk):
                       wraplength=260).grid(row=r, column=5, padx=4, sticky="w")
             self._param_rows[param] = {"cur": cur, "new": new}
 
+        # Friendly "turns before wrapping" view over TOTAL_MEASURING_RANGE
+        # (encoder-shaft revolutions = measuring range / steps-per-rev).
+        turns_fr = ttk.Frame(outer)
+        turns_fr.pack(fill="x", padx=4, pady=(8, 0))
+        ttk.Label(turns_fr, text="Turns before wrapping (encoder revs):").pack(side="left", padx=(0, 4))
+        self.var_turns = tk.StringVar(value="-")
+        ttk.Entry(turns_fr, textvariable=self.var_turns, width=10).pack(side="left")
+        ttk.Button(turns_fr, text="Read", width=6, command=self._read_turns).pack(side="left", padx=4)
+        ttk.Button(turns_fr, text="Write", width=6, command=self._write_turns).pack(side="left")
+        ttk.Label(turns_fr, text="= total measuring range ÷ steps-per-rev",
+                  foreground="#666").pack(side="left", padx=8)
+
         # write-only actions
         actions = ttk.Frame(outer)
         actions.pack(fill="x", padx=4, pady=(6, 4))
@@ -395,6 +407,60 @@ class EncoderGui(tk.Tk):
 
         self._run_async(lambda: profile.apply(enc, counting_direction=direction),
                         on_ok, "Applying reach-stacker profile ...")
+
+    def _read_turns(self):
+        """Show TOTAL_MEASURING_RANGE expressed as encoder-shaft revolutions."""
+        enc = self._enc
+        if enc is None:
+            return
+
+        def work():
+            spr = enc.read_param(Param.STEPS_PER_REV)
+            rng = enc.read_param(Param.TOTAL_MEASURING_RANGE)
+            return rng, spr
+
+        def on_ok(res):
+            rng, spr = res
+            if not spr:
+                self.var_turns.set("?")
+                return
+            turns = rng / spr
+            self.var_turns.set(f"{turns:g}")
+            self._set_msg(f"Wraps after {turns:g} encoder turns "
+                          f"(range {rng} ÷ {spr} steps/rev).")
+
+        self._run_async(work, on_ok, "Reading turns before wrapping ...")
+
+    def _write_turns(self):
+        """Write TOTAL_MEASURING_RANGE from a turns value, with a guard dialog."""
+        enc = self._enc
+        if enc is None:
+            return
+        raw = self.var_turns.get().strip()
+        try:
+            turns = float(raw)
+        except ValueError:
+            messagebox.showwarning("Invalid value", f"'{raw}' is not a number.")
+            return
+        if not messagebox.askyesno(
+                "Confirm write: turns before wrapping",
+                "Changing this parameter may cause the math of the tophandler "
+                "to work improperly. Proceed?",
+                icon="warning"):
+            return
+
+        def work():
+            spr = enc.read_param(Param.STEPS_PER_REV)
+            rng = int(round(turns * spr))
+            enc.write_param(Param.TOTAL_MEASURING_RANGE, rng)
+            return rng
+
+        def on_ok(rng):
+            self._set_msg(f"Wrote measuring range = {rng} counts ({turns:g} turns). Re-reading ...")
+            self._read_turns()
+            self._read_all()
+
+        self._run_async(work, on_ok, f"Writing {turns:g} turns ...")
 
     def _read_one(self, param: Param):
         enc = self._enc
